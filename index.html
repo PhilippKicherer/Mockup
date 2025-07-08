@@ -87,15 +87,15 @@
 
   <button id="roll">Roll</button>
 
-  <a-scene background="#ECECEC">
-
+  <a-scene background="#ECECEC" vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; bebugUIEnabled: false;">
+    <a-marker preset="hiro">
     <!-- d6: box with solid red color -->
     <a-box id="dice-d6" position="0 1.5 -3" scale="1 1 1" visible="true" color="#ff4444" rotation="0 45 0"></a-box>
 
     <!-- d20: icosahedron with solid blue color -->
     <a-icosahedron id="dice-d20" position="0 1.5 -3" scale="1 1 1" visible="false" color="#3366ff" rotation="0 45 0">
     </a-icosahedron>
-
+    </a-marker>
 
     <a-entity light="type: ambient; color: #BBB"></a-entity>
     <a-entity light="type: directional; intensity: 0.8" position="1 2 1"></a-entity>
