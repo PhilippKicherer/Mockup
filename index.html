@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Colored Dice with A-Frame Primitives</title>
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+
+    #dice-selector {
+      position: absolute;
+      top: 10px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      z-index: 10;
+    }
+
+    #dice-selector button {
+      padding: 8px 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      background-color: #eee;
+      cursor: pointer;
+    }
+
+    #dice-selector button.disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    #roll {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    #result-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 40px 60px;
+      font-size: 48px;
+      font-weight: bold;
+      color: #222;
+      background-color: #ffffff;
+      border: 3px solid #333;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+      z-index: 10;
+      display: none;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="dice-selector">
+    <button id="d6">d6</button>
+    <button id="d20">d20</button>
+  </div>
+
+  <div id="result-popup"
+">
+    Ergebnis: <span id="result-number"></span>
+  </div>
+
+  <button id="roll">Roll</button>
+
+  <a-scene background="#ECECEC" vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; bebugUIEnabled: false;">
+    <a-marker preset="hiro">
+    <!-- d6: box with solid red color -->
+    <a-box id="dice-d6" position="0 1.5 -3" scale="1 1 1" visible="true" color="#ff4444" rotation="0 45 0"></a-box>
+
+    <!-- d20: icosahedron with solid blue color -->
+    <a-icosahedron id="dice-d20" position="0 1.5 -3" scale="1 1 1" visible="false" color="#3366ff" rotation="0 45 0">
+    </a-icosahedron>
+    </a-marker>
+
+    <a-entity light="type: ambient; color: #BBB"></a-entity>
+    <a-entity light="type: directional; intensity: 0.8" position="1 2 1"></a-entity>
+    <a-entity camera position="0 1.6 3"></a-entity>
+  </a-scene>
+
+  <script>
+    const rollBtn = document.getElementById('roll');
+    const d6Btn = document.getElementById('d6');
+    const d20Btn = document.getElementById('d20');
+    const diceD6 = document.getElementById('dice-d6');
+    const diceD20 = document.getElementById('dice-d20');
+    const resultPopup = document.getElementById('result-popup');
+    const resultNumber = document.getElementById('result-number');
+
+    let currentDice = diceD6;
+
+    // Show only one dice at a time
+    function showDice(dice) {
+      diceD6.setAttribute('visible', false);
+      diceD20.setAttribute('visible', false);
+      dice.setAttribute('visible', true);
+      currentDice = dice;
+    }
+
+    d6Btn.addEventListener('click', () => showDice(diceD6));
+    d20Btn.addEventListener('click', () => showDice(diceD20));
+
+    // Roll animation: random rotation with smooth easing
+    rollBtn.addEventListener('click', () => {
+      const randRotation = () => Math.floor(Math.random() * 4) * 90;
+
+      const rotX = randRotation();
+      const rotY = randRotation();
+      const rotZ = randRotation();
+
+      currentDice.setAttribute('animation__roll', {
+        property: 'rotation',
+        to: `${rotX} ${rotY} ${rotZ}`,
+        dur: 1200,
+        easing: 'easeOutElastic',
+        loop: false,
+      });
+      // Bestimme Würfelergebnis basierend auf Würfeltyp
+      let result;
+      if (currentDice === diceD6) {
+        result = Math.floor(Math.random() * 6) + 1; // 1 bis 6
+      } else if (currentDice === diceD20) {
+        result = Math.floor(Math.random() * 20) + 1; // 1 bis 20
+      }
+
+      // Ergebnis anzeigen (leicht verzögert für mehr Realismus)
+      setTimeout(() => {
+        resultNumber.textContent = result;
+        resultPopup.style.display = 'block';
+      }, 1300); // nach der Animation
+    });
+    document.addEventListener('click', (event) => {
+      if (resultPopup.style.display === 'block') {
+        // Wenn der Klick NICHT im Pop-up oder Roll-Button ist
+        if (!resultPopup.contains(event.target) && event.target !== rollBtn) {
+          resultPopup.style.display = 'none';
+        }
+      }
+    });
+  </script>
+
+</body>
+
+</html>
